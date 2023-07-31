@@ -72,9 +72,9 @@ bash exp_script.sh
 ## Acknowledgements
 We gratefully acknowledge authors of the following repositories:
 
-1. [Outlier Exposure](https://github.com/hendrycks/outlier-exposure),
-2. [Energy based Out-of-distribution Detection](https://github.com/wetliu/energy_ood),
-3. [Mahalanobis Method for OOD Detection](https://github.com/pokaxpoka/deep_Mahalanobis_detector) and
+1. [Outlier Exposure](https://github.com/hendrycks/outlier-exposure)
+2. [Energy based Out-of-distribution Detection](https://github.com/wetliu/energy_ood)
+3. [Mahalanobis Method for OOD Detection](https://github.com/pokaxpoka/deep_Mahalanobis_detector)
 4. [Siamese Network](https://github.com/fangpin/siamese-pytorch)
 5. [Deep Gamblers](https://github.com/Z-T-WANG/NIPS2019DeepGamblers)
 6. [Self-Adaptive Training](https://github.com/LayneH/self-adaptive-training)
