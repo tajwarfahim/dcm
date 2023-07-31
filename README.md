@@ -81,6 +81,8 @@ We gratefully acknowledge authors of the following repositories:
 7. [pytorch-cifar](https://github.com/kuangliu/pytorch-cifar)
 8. [OOD Detection Inconsistency](https://github.com/tajwarfahim/OOD_Detection_Inconsistency)
 
+In addition, please use the code provided in [ERD](https://github.com/ericpts/ERD) repository to reproduce the performance of ERD/binary classification.
+
 We thank the authors of these repositories for providing us with easy-to-work-with codebases.
 
 
