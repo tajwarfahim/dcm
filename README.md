@@ -38,7 +38,7 @@ Please see the instructions in [OOD Detection Inconsistency](https://github.com/
 
 ## Pre-trained model weights
 
-Pre-trained model weights for OOD detection experiments can be found in the following link: [link](https://drive.google.com/drive/folders/1fDfVdyFtMdArI1H2i4zLdPe3bT5c1IoW?usp=sharing). 
+Pre-trained model weights for OOD detection experiments can be found in the following link: [link](https://drive.google.com/drive/folders/1fDfVdyFtMdArI1H2i4zLdPe3bT5c1IoW?usp=sharing). The weights trained with seeds 1 to 5 correspond to models trained on the complete ID set, and weights trained with seeds 11 to 15 correspond to models trained on half of the ID set (classes 0 to 4 for CIFAR-10, classes 0-49 for CIFAR-100) for the near-OOD detection task.
 
 Similarly, weights for the selective classification experiments can be found [here](https://drive.google.com/drive/folders/1Wg-bznMcdu6dcgFBzGdvJP1A_I3wOD7y?usp=sharing).
 
