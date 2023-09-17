@@ -20,11 +20,7 @@ from .tinyimagenet import TinyImageNet
 def get_mean_and_std_of_dataset(dataset):
     single_img, _ = dataset[0]
     assert torch.is_tensor(single_img)
-    num_channels, dim_1, dim_2 = (
-        single_img.shape[0],
-        single_img.shape[1],
-        single_img.shape[2],
-    )
+    num_channels, dim_1, dim_2 = single_img.shape[0], single_img.shape[1], single_img.shape[2]
 
     loader = torch.utils.data.DataLoader(dataset, batch_size=128, num_workers=4, shuffle=False)
     mean = 0.0
@@ -85,9 +81,9 @@ def load_dataset_with_basic_transform(dataset_name, train, path):
             )
 
     elif dataset_name == "MNIST":
-        transform = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))]
-        )
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize((0.5,), (0.5,))
+                                        ])
         dataset = datasets.MNIST(root=path, train=train, download=True, transform=transform)
 
     elif dataset_name == "TinyImageNet":
@@ -103,20 +99,14 @@ def load_dataset_with_basic_transform(dataset_name, train, path):
 def get_custom_data_transform(dataset_name, augment, mean, std):
     if dataset_name == "SVHN":
         transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(mean, std),
-            ]
+                [
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean, std),
+                ]
         )
 
     elif augment:
-        if dataset_name in [
-            "CIFAR10",
-            "CIFAR100",
-            "CIFAR100Coarse",
-            "TinyImageNet_Resize",
-            "LSUN_Resize",
-        ]:
+        if dataset_name in ["CIFAR10", "CIFAR100", "CIFAR100Coarse", "TinyImageNet_Resize", "LSUN_Resize"]:
             transform = transforms.Compose(
                 [
                     transforms.RandomHorizontalFlip(),
@@ -151,14 +141,7 @@ def get_custom_data_transform(dataset_name, augment, mean, std):
             raise ValueError("Given dataset name is not supported.")
 
     else:
-        if dataset_name in [
-            "CIFAR10",
-            "CIFAR100",
-            "CIFAR100Coarse",
-            "TinyImageNet",
-            "TinyImageNet_Resize",
-            "LSUN_Resize",
-        ]:
+        if dataset_name in ["CIFAR10", "CIFAR100", "CIFAR100Coarse", "TinyImageNet", "TinyImageNet_Resize", "LSUN_Resize"]:
             transform = transforms.Compose(
                 [transforms.ToTensor(), transforms.Normalize(mean, std)]
             )
@@ -199,11 +182,7 @@ def load_dataset_with_custom_data_transform(dataset_name, train, path, transform
     elif dataset_name == "CelebA":
         split = "train" if train else "test"
         dataset = datasets.CelebA(
-            root=path,
-            split=split,
-            download=True,
-            transform=transform,
-            target_type="identity",
+            root=path, split=split, download=True, transform=transform, target_type='identity'
         )
 
     elif dataset_name == "SVHN":
@@ -279,14 +258,11 @@ def load_dataset(
         )
 
     dataset = load_dataset_with_custom_data_transform(
-        dataset_name=dataset_name,
-        train=train,
-        path=dataset_path,
-        transform=custom_transform,
+        dataset_name=dataset_name, train=train, path=dataset_path, transform=custom_transform
     )
 
     if return_mean:
-        return dataset, mean
+        return dataset, mean, std
     else:
         return dataset
 
@@ -406,7 +382,6 @@ import numpy as np
 import torch
 import collections
 
-
 class SampledDataset(torch.utils.data.Dataset):
     def _get_class_to_idx_mapping(self, dataset):
         class_to_idx_mapping = collections.defaultdict(list)
@@ -419,26 +394,27 @@ class SampledDataset(torch.utils.data.Dataset):
 
         return class_to_idx_mapping
 
-    def __init__(
-        self,
+    def __init__(self,
         dataset,
         start_index,
         end_index,
     ):
-        """
+        '''
         Parameters
         ----------
         dataset
         start_index: start index of examples in each class
         end_index: end index of examples in each class
-        """
+        '''
         self.dataset = dataset
-        self.class_to_idx_mapping = self._get_class_to_idx_mapping(dataset=self.dataset)
+        self.class_to_idx_mapping = self._get_class_to_idx_mapping(
+            dataset=self.dataset
+        )
 
         indices = []
         for class_label in self.class_to_idx_mapping.keys():
             class_indices = self.class_to_idx_mapping[class_label]
-            indices += class_indices[start_index:end_index]
+            indices += class_indices[start_index : end_index]
 
         self.indices = indices
 
@@ -568,7 +544,7 @@ class SelectiveClassDataset(torch.utils.data.Dataset):
         self.dataset = dataset
 
         labels = [label for label in range(start_label, end_label)]
-        remapped_labels = {labels[i]: i for i in range(len(labels))}
+        remapped_labels = {labels[i] : i for i in range(len(labels))}
 
         self.labels = labels
         self.remapped_labels = remapped_labels

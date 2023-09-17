@@ -35,7 +35,7 @@ def create_train_loader(args):
         num_workers=args["num_workers"],
     )
 
-    _, mean = load_dataset(
+    _, mean, std = load_dataset(
         dataset_name=args["id_dataset_name"],
         dataset_path=args["id_dataset_path"],
         train=True,
@@ -45,7 +45,7 @@ def create_train_loader(args):
         return_mean=True,
     )
 
-    return train_dataloader, mean
+    return train_dataloader, mean, std
 
 
 def create_val_dataloader(args):
@@ -211,7 +211,7 @@ def create_unlabeled_dataloader(args):
 def create_dataloaders(args):
     dataloaders = {}
     # get id train
-    dataloaders["train"], dataloaders["mean"] = create_train_loader(args=args)
+    dataloaders["train"], dataloaders["mean"], dataloaders["std"] = create_train_loader(args=args)
 
     # get id val
     dataloaders["val"] = create_val_dataloader(args=args)

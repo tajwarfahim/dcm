@@ -32,7 +32,7 @@ def process_dataset(model, dataloader, score_type="msp"):
         for img, label in dataloader:
             if torch.cuda.is_available():
                 img = img.cuda()
-
+            
             output = model(img)
             probs = torch.nn.functional.softmax(output, dim=1).detach().cpu().numpy()
             preds.append(np.argmax(probs, axis=1))
@@ -90,48 +90,48 @@ class MSPScorer:
         id_test_dataloader,
         ood_test_dataloader,
         num_classes,
-        id_train_dataset_mean,
+        id_train_dataset_std,
     ):
         self.id_train_dataloader = id_train_dataloader
         self.id_test_dataloader = id_test_dataloader
         self.ood_test_dataloader = ood_test_dataloader
         self.num_classes = num_classes
-        self.id_train_dataset_mean = id_train_dataset_mean
+        self.id_train_dataset_std = id_train_dataset_std
 
-        print("Mean: ", self.id_train_dataset_mean)
+        print("Std: ", self.id_train_dataset_std)
 
     def calculate_msp_scores(self, model):
         self.id_msp_scores = -1.0 * get_score(
-            model=model,
+            model=model, 
             dataloader=self.id_test_dataloader,
             score_type="msp",
         )
         self.ood_msp_scores = -1.0 * get_score(
-            model=model,
+            model=model, 
             dataloader=self.ood_test_dataloader,
             score_type="msp",
         )
 
     def calculate_energy_scores(self, model):
         self.id_energy_scores = -1.0 * get_score(
-            model=model,
+            model=model, 
             dataloader=self.id_test_dataloader,
             score_type="energy",
         )
         self.ood_energy_scores = -1.0 * get_score(
-            model=model,
+            model=model, 
             dataloader=self.ood_test_dataloader,
             score_type="energy",
         )
 
     def calculate_maxlogit_scores(self, model):
         self.id_maxlogit_scores = -1.0 * get_score(
-            model=model,
+            model=model, 
             dataloader=self.id_test_dataloader,
             score_type="maxlogit",
         )
         self.ood_maxlogit_scores = -1.0 * get_score(
-            model=model,
+            model=model, 
             dataloader=self.ood_test_dataloader,
             score_type="maxlogit",
         )
@@ -147,7 +147,7 @@ class MSPScorer:
             T=temperature,
             noise=noise,
             in_dist=True,
-            mean=self.id_train_dataset_mean,
+            std=self.id_train_dataset_std,
         )
 
         self.ood_odin_score = get_ood_scores_odin(
@@ -158,7 +158,7 @@ class MSPScorer:
             T=temperature,
             noise=noise,
             in_dist=False,
-            mean=self.id_train_dataset_mean,
+            std=self.id_train_dataset_std,
         )
 
     def calculate_mahalanobis_scores(self, model, noise):
@@ -197,7 +197,7 @@ class MSPScorer:
             magnitude=noise,
             num_batches=num_batches,
             in_dist=True,
-            mean=self.id_train_dataset_mean,
+            std=self.id_train_dataset_std,
         )
 
         self.ood_mahalanobis_score = get_Mahalanobis_score(
@@ -210,7 +210,7 @@ class MSPScorer:
             magnitude=noise,
             num_batches=num_batches,
             in_dist=False,
-            mean=self.id_train_dataset_mean,
+            std=self.id_train_dataset_std,
         )
 
     def choose_id_and_ood_scores(self, score_type):
@@ -345,6 +345,7 @@ class MSPScorer:
 
         return selective_accuracy
 
+
     def calculate_selective_classification_coverage(
         self, model, threshold=0.98, grid_size=1000, score_type="msp"
     ):
@@ -376,13 +377,9 @@ class MSPScorer:
 
         raise ValueError(f"Selective accuracy never reaches threshold {threshold}")
 
+
     def calculate_selective_classification_auc(
-        self,
-        model,
-        grid_size=1000,
-        should_plot=False,
-        figure_path=None,
-        score_type="msp",
+        self, model, grid_size=1000, should_plot=False, figure_path=None, score_type="msp"
     ):
         preds, all_scores, targets = process_dataset(
             model=model,
@@ -415,7 +412,12 @@ class MSPScorer:
 
         if should_plot:
             fig = plt.figure(figsize=(5, 5))
-            plt.plot(coverages, selective_accuracies, "b--", label=f"AUC: {area_under_curve}")
+            plt.plot(
+                coverages,
+                selective_accuracies,
+                "b--",
+                label=f"AUC: {area_under_curve}"
+            )
             plt.xlabel("Coverage (%)", fontsize="x-large")
             plt.ylabel("Selective accuracy (%)", fontsize="x-large")
             plt.title("Selective accuracy vs coverage plot", fontsize="xx-large")

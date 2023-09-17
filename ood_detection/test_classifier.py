@@ -1,19 +1,16 @@
 from __future__ import print_function
 
-import argparse
 import os
 import time
 import warnings
 import wandb
 
-import torch
 
 # imports from our scripts
 from utils.msp_scorer import MSPScorer
 from conf import parse_arguments, print_arguments
 from dataloading_utils import create_dataloaders
 from train_classifier import run_model_training
-from utils.pytorch_pairwise_dataset import get_mean_and_std_of_dataset
 
 
 def integrate_wandb(args):
@@ -29,25 +26,13 @@ def integrate_wandb(args):
 
 def run_odin_experiment(args, scorer, model):
     # search grid for noise value used in mahalanobis paper's code
-    noise_values = [
-        0.0,
-        0.0005,
-        0.001,
-        0.0014,
-        0.002,
-        0.0024,
-        0.005,
-        0.01,
-        0.05,
-        0.1,
-        0.2,
-    ]
+    noise_values = [0.0, 0.0005, 0.001, 0.0014, 0.002, 0.0024, 0.005, 0.01, 0.05, 0.1, 0.2]
 
     noise_values = list(set(noise_values))
     noise_values.sort()
 
     # search grid for temperature value used in mahalanobis paper's code
-    temperature_values = [1000.0]  # [1.0, 10.0, 100.0, 1000.0]
+    temperature_values = [1000.0] #[1.0, 10.0, 100.0, 1000.0]
 
     print("Running ODIN baseline.")
     print("Temperature values we try: ", temperature_values)
@@ -99,19 +84,7 @@ def run_odin_experiment(args, scorer, model):
 
 
 def run_mahalanobis_experiment(scorer, args, model):
-    noise_values = [
-        0.0,
-        0.0005,
-        0.001,
-        0.0014,
-        0.002,
-        0.0024,
-        0.005,
-        0.01,
-        0.05,
-        0.1,
-        0.2,
-    ]
+    noise_values = [0.0, 0.0005, 0.001, 0.0014, 0.002, 0.0024, 0.005, 0.01, 0.05, 0.1, 0.2]
 
     best_cons_metric = None
     default_noise = 0.0
@@ -205,7 +178,6 @@ def run_no_extra_hyperparam_experiment(scorer, args, model, score_type):
         step=0,
     )
 
-
 def run_script(args):
     warnings.filterwarnings("ignore", ".*does not have many workers.*")
     integrate_wandb(args=args)
@@ -220,15 +192,17 @@ def run_script(args):
     id_test_dataloader = dataloaders["test"]
     ood_test_dataloader = dataloaders["ood"]
     mean = dataloaders["mean"]
+    std = dataloaders["std"]
 
-    print("ID train dataset mean: ", mean, "\n")
+    print("\nID train dataset mean: ", mean)
+    print("ID train dataset std: ", std, "\n")
 
     scorer = MSPScorer(
         id_train_dataloader=id_train_dataloader,
         id_test_dataloader=id_test_dataloader,
         ood_test_dataloader=ood_test_dataloader,
         num_classes=args["num_classes"],
-        id_train_dataset_mean=mean,
+        id_train_dataset_std=std,
     )
 
     accuracy = scorer.calculate_accuracy(model=model)

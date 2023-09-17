@@ -87,7 +87,7 @@ def fpr_and_fdr_at_recall(y_true, y_score, recall_level, pos_label):
     return fps[cutoff] / (np.sum(np.logical_not(y_true)))
 
 
-def ODIN(inputs, outputs, model, temper, noiseMagnitude1, mean):
+def ODIN(inputs, outputs, model, temper, noiseMagnitude1, std):
     # Calculating the perturbation we need to add, that is,
     # the sign of gradient of cross entropy loss w.r.t. input
     criterion = nn.CrossEntropyLoss()
@@ -108,17 +108,17 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1, mean):
     gradient.index_copy_(
         1,
         torch.LongTensor([0]).cuda(),
-        gradient.index_select(1, torch.LongTensor([0]).cuda()) / (mean[0]),
+        gradient.index_select(1, torch.LongTensor([0]).cuda()) / (std[0]),
     )
     gradient.index_copy_(
         1,
         torch.LongTensor([1]).cuda(),
-        gradient.index_select(1, torch.LongTensor([1]).cuda()) / (mean[1]),
+        gradient.index_select(1, torch.LongTensor([1]).cuda()) / (std[1]),
     )
     gradient.index_copy_(
         1,
         torch.LongTensor([2]).cuda(),
-        gradient.index_select(1, torch.LongTensor([2]).cuda()) / (mean[2]),
+        gradient.index_select(1, torch.LongTensor([2]).cuda()) / (std[2]),
     )
 
     # Adding small perturbations to images
@@ -134,7 +134,7 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1, mean):
     return nnOutputs
 
 
-def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, mean, in_dist=False):
+def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, std, in_dist=False):
     _score = []
     _right_score = []
     _wrong_score = []
@@ -149,7 +149,7 @@ def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, mean, in_di
         output = net(data)
         smax = to_np(F.softmax(output, dim=1))
 
-        odin_score = ODIN(data, output, net, T, noise, mean)
+        odin_score = ODIN(data, output, net, T, noise, std)
         _score.append(-np.max(odin_score, 1))
 
         if in_dist:
@@ -162,11 +162,7 @@ def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, mean, in_di
             _wrong_score.append(-np.max(smax[wrong_indices], axis=1))
 
     if in_dist:
-        return (
-            concat(_score).copy(),
-            concat(_right_score).copy(),
-            concat(_wrong_score).copy(),
-        )
+        return concat(_score).copy(), concat(_right_score).copy(), concat(_wrong_score).copy()
     else:
         return concat(_score)[:ood_num_examples].copy()
 
@@ -180,7 +176,7 @@ def get_Mahalanobis_score(
     layer_index,
     magnitude,
     num_batches,
-    mean,
+    std,
     in_dist=False,
 ):
     """
@@ -230,17 +226,17 @@ def get_Mahalanobis_score(
         gradient.index_copy_(
             1,
             torch.LongTensor([0]).cuda(),
-            gradient.index_select(1, torch.LongTensor([0]).cuda()) / mean[0],
+            gradient.index_select(1, torch.LongTensor([0]).cuda()) / std[0],
         )
         gradient.index_copy_(
             1,
             torch.LongTensor([1]).cuda(),
-            gradient.index_select(1, torch.LongTensor([1]).cuda()) / mean[1],
+            gradient.index_select(1, torch.LongTensor([1]).cuda()) / std[1],
         )
         gradient.index_copy_(
             1,
             torch.LongTensor([2]).cuda(),
-            gradient.index_select(1, torch.LongTensor([2]).cuda()) / mean[2],
+            gradient.index_select(1, torch.LongTensor([2]).cuda()) / std[2],
         )
 
         tempInputs = torch.add(data.data, -magnitude, gradient)
